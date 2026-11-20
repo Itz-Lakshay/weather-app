@@ -5,15 +5,40 @@ const message = document.getElementById("message")
 const currentWeather = document.getElementById("current-weather")
 
 async function getWeather(city) {
-    const q = encodeURIComponent(city)
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${q}&appid=${API_KEY}&units=metric`
-    const response = await fetch(url)
-    const data = await response.json()
-    console.log(data);
-    showCurrentWeather(data)
+    currentWeather.innerHTML = ""
+    message.textContent = ""
+
+    try {
+        const q = encodeURIComponent(city)
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${q}&appid=${API_KEY}&units=metric`
+        const response = await fetch(url)
+        if (!response.ok) { //this is same as response.ok === false
+            if (response.status === 404) {
+                throw new Error("City not found")
+            }
+            else if (response.status === 401) {
+                throw new Error("Invalid API Key")
+            }
+            else {
+                throw new Error("Something went wrong! Try Again")
+            }
+        }
+
+        const data = await response.json()
+        showCurrentWeather(data)
+
+    } 
+    catch (error) {
+        if(error instanceof TypeError) {
+            message.textContent = "Network error. Check your internet connection."
+        } 
+        else {
+            message.textContent = error.message
+        }
+    }
 }
 
-function showCurrentWeather(data){
+function showCurrentWeather(data) {
     currentWeather.innerHTML = ""
 
     const name = document.createElement("h2")
@@ -21,7 +46,7 @@ function showCurrentWeather(data){
 
     const temp = document.createElement("p")
     temp.textContent = `${data.main.temp}°C`
-    
+
     const desc = document.createElement("div")
     desc.textContent = data.weather[0].description
 
@@ -38,10 +63,11 @@ function showCurrentWeather(data){
     currentWeather.append(hum)
 }
 
-searchBtn.addEventListener("click",()=>{
+searchBtn.addEventListener("click", () => {
     let city = cityInput.value
     city = city.trim()
     if (city === "") {
+        message.textContent = "Please enter a city name"
         return
     }
     getWeather(city)
