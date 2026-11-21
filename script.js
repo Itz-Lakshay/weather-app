@@ -1,10 +1,11 @@
-const API_KEY = "9740edefeffcf6e30214106f4a144aca"
+const API_KEY = "aa1d99d5262b42060d6be19bd605db31"
 const cityInput = document.getElementById("city-input")
 const searchBtn = document.getElementById("search-btn")
 const message = document.getElementById("message")
 const currentWeather = document.getElementById("current-weather")
 
 async function getWeather(city) {
+    forecastSection.hidden = true
     currentWeather.innerHTML = ""
     message.textContent = ""
 
@@ -26,12 +27,13 @@ async function getWeather(city) {
 
         const data = await response.json()
         showCurrentWeather(data)
+        await getForecast(city)
 
-    } 
+    }
     catch (error) {
-        if(error instanceof TypeError) {
+        if (error instanceof TypeError) {
             message.textContent = "Network error. Check your internet connection."
-        } 
+        }
         else {
             message.textContent = error.message
         }
@@ -72,3 +74,53 @@ searchBtn.addEventListener("click", () => {
     }
     getWeather(city)
 })
+
+const forecastSection = document.getElementById("forecast-section")
+const forecastList = document.getElementById("forecast-list")
+const filterSelect = document.getElementById("filter-select")
+
+let forecastData = []
+
+async function getForecast(city) {
+    const q = encodeURIComponent(city)
+    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${q}&appid=${API_KEY}&units=metric`
+    const response = await fetch(url)
+
+    if (!response.ok) { //this is same as response.ok === false
+        if (response.status === 404) {
+            throw new Error("City not found")
+        }
+        else if (response.status === 401) {
+            throw new Error("Invalid API Key")
+        }
+        else {
+            throw new Error("Something went wrong! Try Again")
+        }
+    }
+
+    const data = await response.json()
+    forecastData = data.list
+    forecastSection.hidden = false
+    renderForecast()
+}
+
+function renderForecast() {
+    forecastList.innerHTML = ""
+    forecastData.forEach(e => {
+        let div = document.createElement("div")
+        div.setAttribute("class", "forecast-card")
+        let p1 = document.createElement("p")
+        p1.textContent = e.dt_txt
+        div.append(p1)
+
+        let p2 = document.createElement("p")
+        p2.textContent = `${e.main.temp}°C`
+        div.append(p2)
+
+        let p3 = document.createElement("p")
+        p3.textContent = e.weather[0].description
+        div.append(p3)
+
+        forecastList.append(div)
+    });
+}
