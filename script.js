@@ -5,6 +5,7 @@ const message = document.getElementById("message")
 const currentWeather = document.getElementById("current-weather")
 
 async function getWeather(city) {
+    filterSelect.value = "all"
     forecastSection.hidden = true
     currentWeather.innerHTML = ""
     message.textContent = ""
@@ -105,8 +106,18 @@ async function getForecast(city) {
 }
 
 function renderForecast() {
+    const selected = filterSelect.value
     forecastList.innerHTML = ""
-    forecastData.forEach(e => {
+
+    let group
+    if (selected === "all") {
+        group = forecastData
+    }
+    else{
+        group = forecastData.filter(g => g.weather[0].main === selected)
+    }
+
+    group.forEach(e => {
         let div = document.createElement("div")
         div.setAttribute("class", "forecast-card")
         let p1 = document.createElement("p")
@@ -124,3 +135,5 @@ function renderForecast() {
         forecastList.append(div)
     });
 }
+
+filterSelect.addEventListener("change", renderForecast)
