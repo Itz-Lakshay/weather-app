@@ -95,3 +95,9 @@ body{
 #current-weather:empty{
     display: none;
 }
+
+.empty-msg{
+    grid-column: 1 / -1;
+    color: #CBD5E1;
+    text-align: center;
+}

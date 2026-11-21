@@ -76,6 +76,10 @@ searchBtn.addEventListener("click", () => {
     getWeather(city)
 })
 
+cityInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") searchBtn.click()
+})
+
 const forecastSection = document.getElementById("forecast-section")
 const forecastList = document.getElementById("forecast-list")
 const filterSelect = document.getElementById("filter-select")
@@ -113,8 +117,16 @@ function renderForecast() {
     if (selected === "all") {
         group = forecastData
     }
-    else{
+    else {
         group = forecastData.filter(g => g.weather[0].main === selected)
+    }
+
+    if (group.length === 0) {
+        const empty = document.createElement("p")
+        empty.textContent = "No matching forecast"
+        empty.className = "empty-msg"
+        forecastList.append(empty)
+        return
     }
 
     group.forEach(e => {
